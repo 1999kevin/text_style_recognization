@@ -11,9 +11,30 @@ from torchtext import data, datasets
 from torchtext.data import Field,Dataset,Iterator,Example,BucketIterator
 
 class Net(nn.Module):
-    def __init__(self,vocab_size):
-        super(Net,self).__init__()
-        pass
+    # def __init__(self,vocab_size):
+    #     super(Net,self).__init__()
+    def __init__(self, vocab_size, embedding_dim, hidden_dim, output_dim, n_layers, 
+                 bidirectional, dropout):
+        
+        super().__init__()          
+        
+        #embedding 层
+        self.embedding = nn.Embedding(vocab_size, embedding_dim)
+        
+        #lstm 层
+        self.lstm = nn.LSTM(embedding_dim, 
+                           hidden_dim, 
+                           num_layers=n_layers, 
+                           bidirectional=bidirectional, 
+                           dropout=dropout,
+                           batch_first=True)
+        
+        #全连接层
+        self.fc = nn.Linear(hidden_dim * 2, output_dim)
+        
+        #激活函数
+        self.act = nn.Sigmoid()
+        # pass
 
     def forward(self,x):
         """
