@@ -114,65 +114,7 @@ class LSTM(nn.Module):
 model = LSTM()
 # # Pytorch定义模型的方式之一：
 # # 继承 Module 类并实现其中的forward方法
-# class Net(nn.Module):
 
-#     def __init__(self, vocab_size, embedding_dim, hidden_dim, output_dim, n_layers, 
-#                  bidirectional, dropout):
-        
-#         super().__init__()          
-        
-#         #embedding 层
-#         self.embedding = nn.Embedding(vocab_size, embedding_dim)
-        
-#         #lstm 层
-#         self.lstm = nn.LSTM(embedding_dim, 
-#                            hidden_dim, 
-#                            num_layers=n_layers, 
-#                            bidirectional=bidirectional, 
-#                            dropout=dropout,
-#                            batch_first=True)
-        
-#         #全连接层
-#         self.fc = nn.Linear(hidden_dim * 2, output_dim)
-        
-#         #激活函数
-#         self.act = nn.Sigmoid()
-        
-#     def forward(self, text, text_lengths):
-        
-#         #text = [batch size,sent_length]
-#         embedded = self.embedding(text)
-#         #embedded = [batch size, sent_len, emb dim]
-      
-#         packed_embedded = nn.utils.rnn.pack_padded_sequence(embedded, text_lengths,batch_first=True)
-        
-#         packed_output, (hidden, cell) = self.lstm(packed_embedded)
-#         #hidden = [batch size, num layers * num directions,hid dim]
-#         #cell = [batch size, num layers * num directions,hid dim]
-        
-#         #连接最后的正向和反向隐状态
-#         hidden = torch.cat((hidden[-2,:,:], hidden[-1,:,:]), dim = 1)
-                
-#         #hidden = [batch size, hid dim * num directions]
-#         dense_outputs=self.fc(hidden)
-
-#         #激活
-#         outputs=self.act(dense_outputs)
-        
-#         return outputs
-
-    
-    
-# # 创建模型实例
-# size_of_vocab = len(TEXT.vocab)
-# embedding_dim = 100
-# num_hidden_nodes = 32
-# num_output_nodes = 5
-# num_layers = 2
-# bidirection = True
-# dropout = 0.2
-# model = Net(size_of_vocab, embedding_dim, num_hidden_nodes,num_output_nodes, num_layers, 
-#                    bidirectional = True, dropout = dropout)
 for name, parameters in model.named_parameters():
     print(name, ':', parameters.size())
 loss_fn = nn.CrossEntropyLoss()
@@ -220,16 +162,6 @@ for epoch in range(6):
 # 保存模型
 torch.save(model.state_dict(), 'results/temp.pth')
 
-# 绘制曲线
-# plt.figure(figsize=(15,5.5))
-# plt.subplot(121)
-# plt.plot(train_acc_list)
-# plt.plot(val_acc_list)
-# plt.title("acc")
-# plt.subplot(122)
-# plt.plot(train_loss_list)
-# plt.plot(val_loss_list)
-# plt.title("loss")
 model = LSTM()
 model_path = "results/temp.pth"
 model.load_state_dict(torch.load(model_path))
