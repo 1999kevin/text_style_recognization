@@ -23,9 +23,14 @@ from torchtext.data import Dataset
 from torchtext.data import Iterator
 from torchtext.data import Example
 from torchtext.data import BucketIterator
+
+
 dataset = {}
 path = "dataset/"
+device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
 
+model_path = "results/temp2.pth"
+epochs = 6
 def load_data(path):
     """
     读取数据和标签
@@ -67,7 +72,7 @@ train, val = dataset.split(split_ratio=0.7)
 train_iter, val_iter = BucketIterator.splits(
     (train,val), # 数据集
     batch_sizes=(8, 8),
-    device=0, # 如果使用gpu，此处将-1更换为GPU的编号
+    device=device, # 如果使用gpu，此处将-1更换为GPU的编号
     sort_key=lambda x: len(x.text), 
     sort_within_batch=False,
     repeat=False
@@ -111,7 +116,7 @@ class LSTM(nn.Module):
 #         return out    #定义所有层
     
 # 创建模型实例
-model = LSTM()
+model = LSTM().to(device)
 # # Pytorch定义模型的方式之一：
 # # 继承 Module 类并实现其中的forward方法
 
@@ -121,11 +126,13 @@ loss_fn = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters())
 train_acc_list, train_loss_list = [], []
 val_acc_list, val_loss_list = [], []
-for epoch in range(6):
+for epoch in range(epochs):
     train_acc, train_loss = 0, 0
     val_acc, val_loss = 0, 0
     for idx, batch in enumerate(train_iter):
         text, label = batch.text, batch.category
+        text = text.to(device)
+        label = label.to(device)
         optimizer.zero_grad()
         out = model(text)
         loss = loss_fn(out,label.long())
@@ -160,10 +167,11 @@ for epoch in range(6):
     val_loss_list.append(val_loss)
         
 # 保存模型
-torch.save(model.state_dict(), 'results/temp.pth')
+
+torch.save(model.state_dict(), model_path)
 
 model = LSTM()
-model_path = "results/temp.pth"
+
 model.load_state_dict(torch.load(model_path))
 print('模型加载完成...')
 # 这是一个片段
