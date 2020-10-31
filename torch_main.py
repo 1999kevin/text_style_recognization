@@ -30,7 +30,10 @@ path = "dataset/"
 device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
 
 model_path = "results/temp2.pth"
-epochs = 6
+epochs = 3
+embedding_size = 300
+
+
 def load_data(path):
     """
     读取数据和标签
@@ -81,9 +84,9 @@ train_iter, val_iter = BucketIterator.splits(
 class LSTM(nn.Module):
     def __init__(self):
         super(LSTM, self).__init__()
-        self.word_embeddings = nn.Embedding(len(TEXT.vocab), 300)
+        self.word_embeddings = nn.Embedding(len(TEXT.vocab), embedding_size)
         # self.word_embeddings.weight.data.copy_(weight_matrix)
-        self.lstm = nn.LSTM(input_size=300, hidden_size=128, num_layers=1)
+        self.lstm = nn.LSTM(input_size=embedding_size, hidden_size=128, num_layers=1)
         self.decoder = nn.Linear(128, 5)
     
     def forward(self, sentence):
