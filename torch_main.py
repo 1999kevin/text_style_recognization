@@ -86,7 +86,7 @@ class LSTM(nn.Module):
         super(LSTM, self).__init__()
         self.word_embeddings = nn.Embedding(len(TEXT.vocab), embedding_size)
         # self.word_embeddings.weight.data.copy_(weight_matrix)
-        self.lstm = nn.LSTM(input_size=embedding_size, hidden_size=128, num_layers=1,bidirectional=True)
+        self.lstm = nn.LSTM(input_size=embedding_size, hidden_size=128, num_layers=2,bidirectional=True)
         self.decoder = nn.Linear(128*2, 5)
     
     def forward(self, sentence):
