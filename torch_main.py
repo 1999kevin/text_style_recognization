@@ -30,7 +30,7 @@ path = "dataset/"
 device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
 
 model_path = "results/temp2.pth"
-epochs = 5
+epochs = 10
 embedding_size = 300
 
 
@@ -86,7 +86,7 @@ class LSTM(nn.Module):
         super(LSTM, self).__init__()
         self.word_embeddings = nn.Embedding(len(TEXT.vocab), embedding_size)
         # self.word_embeddings.weight.data.copy_(weight_matrix)
-        self.lstm = nn.LSTM(input_size=embedding_size, hidden_size=128, num_layers=2,bidirectional=True)
+        self.lstm = nn.LSTM(input_size=embedding_size, hidden_size=128, num_layers=2,bidirectional=True, dropout=0.5)
         self.decoder = nn.Linear(128*2, 5)
     
     def forward(self, sentence):
@@ -130,6 +130,10 @@ loss_fn = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters())
 train_acc_list, train_loss_list = [], []
 val_acc_list, val_loss_list = [], []
+
+best_val_loss = float('inf')
+best_epoch = -1
+
 for epoch in range(epochs):
     train_acc, train_loss = 0, 0
     val_acc, val_loss = 0, 0
@@ -169,10 +173,27 @@ for epoch in range(epochs):
     train_loss_list.append(train_loss)
     val_acc_list.append(val_acc)
     val_loss_list.append(val_loss)
+
+    if val_loss < best_val_loss :
+        best_val_loss = val_loss
+        best_epoch = epoch
+        torch.save(model.state_dict(), model_path)
+        print("epoch:", epoch)
         
 # 保存模型
-
-torch.save(model.state_dict(), model_path)
+print("best epoch:", best_epoch)
+# torch.save(model.state_dict(), model_path)
+# 绘制曲线
+plt.figure(figsize=(15,5.5))
+plt.subplot(121)
+plt.plot(train_acc_list)
+plt.plot(val_acc_list)
+plt.title("acc")
+plt.subplot(122)
+plt.plot(train_loss_list)
+plt.plot(val_loss_list)
+plt.title("loss")
+plt.show()
 
 model = LSTM()
 
