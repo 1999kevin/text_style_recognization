@@ -31,7 +31,7 @@ device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("
 
 model_path = "results/temp2.pth"
 epochs = 10
-embedding_size = 300
+embedding_size = 500
 
 
 def load_data(path):
@@ -88,7 +88,7 @@ class LSTM(nn.Module):
         # self.word_embeddings.weight.data.copy_(weight_matrix)
         self.lstm = nn.LSTM(input_size=embedding_size, hidden_size=128, num_layers=2,bidirectional=True, dropout=0.5)
         self.decoder = nn.Linear(128*2, 5)
-    
+        # self.decoder = nn.Conv1d(128*2, 5, 2)
     def forward(self, sentence):
         embeds = self.word_embeddings(sentence)
         lstm_out = self.lstm(embeds)[0]
