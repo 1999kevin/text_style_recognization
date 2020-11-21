@@ -30,7 +30,7 @@ path = "dataset/"
 device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
 
 model_path = "results/temp2.pth"
-epochs = 10
+epochs = 15
 embedding_size = 500
 
 
@@ -86,15 +86,20 @@ class LSTM(nn.Module):
         super(LSTM, self).__init__()
         self.word_embeddings = nn.Embedding(len(TEXT.vocab), embedding_size)
         # self.word_embeddings.weight.data.copy_(weight_matrix)
-        self.lstm = nn.LSTM(input_size=embedding_size, hidden_size=128, num_layers=2,bidirectional=True, dropout=0.5)
+        self.lstm = nn.LSTM(input_size=embedding_size, hidden_size=128, num_layers=1,bidirectional=True)
         self.decoder = nn.Linear(128*2, 5)
-        # self.decoder = nn.Conv1d(128*2, 5, 2)
+        # self.decoder1 = nn.Conv1d(128*2, 5, 2)
     def forward(self, sentence):
         embeds = self.word_embeddings(sentence)
         lstm_out = self.lstm(embeds)[0]
+        # print("lstm:",lstm_out.shape)
         final = lstm_out[-1]
-        # y1 = self.decoder1(final)
         y = self.decoder(final)
+        # print(final.shape)
+        # final = lstm_out
+        # final = final.permute(1,2,0)
+        # y = self.decoder1(final)
+
         return y
 
 # Pytorch定义模型的方式之一：
@@ -127,7 +132,7 @@ model = LSTM().to(device)
 for name, parameters in model.named_parameters():
     print(name, ':', parameters.size())
 loss_fn = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters())
+optimizer = torch.optim.Adam(model.parameters(), weight_decay=0.001)
 train_acc_list, train_loss_list = [], []
 val_acc_list, val_loss_list = [], []
 
@@ -184,15 +189,18 @@ for epoch in range(epochs):
 print("best epoch:", best_epoch)
 # torch.save(model.state_dict(), model_path)
 # 绘制曲线
+
 plt.figure(figsize=(15,5.5))
 plt.subplot(121)
-plt.plot(train_acc_list)
-plt.plot(val_acc_list)
+plt.plot(train_acc_list, label="train accuracy")
+plt.plot(val_acc_list, label="test accuracy")
 plt.title("acc")
+plt.legend()
 plt.subplot(122)
 plt.plot(train_loss_list)
 plt.plot(val_loss_list)
 plt.title("loss")
+# plt.legend()
 plt.show()
 
 model = LSTM()
